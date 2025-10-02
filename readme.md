@@ -7,7 +7,7 @@ BERT-based transformers for climbing route difficulty prediction on Kilter Board
 All data are fetched from boardlib library. Kilter board is chosen from its standardization and popularity. Encoding is done with ease, without image processing burden. Though, that could be another interesting idea.
 
 <div align="center">
-  <img src="figs/plot_boulder_prediction.png" alt="Kilter Board Route Example" width="350"/>
+  <img src="figs/plot_boulder_prediction.png" alt="Kilter Board Route Example" width="400"/>
   
 </div>
 
@@ -26,7 +26,7 @@ All data are fetched from boardlib library. Kilter board is chosen from its stan
 - BERT Encoder: RMSE 1.6 (82% ±1 V-grade accuracy)
 
 <div align="center">
-    <img src="figs/plot_prediction_good_ass.png" alt="Predictions" width="350"/>
+    <img src="figs/plot_prediction_good_ass.png" alt="Predictions" width="400"/>
 </div>
 
 *"That last 6%, it doesn't sound like a lot, but it's tremendous"* - Gale Boetticher, Breaking Bad (probably)
@@ -35,17 +35,20 @@ All data are fetched from boardlib library. Kilter board is chosen from its stan
 
 
 ## Project Structure
+```
+project-root/
 ├── utils/
-│ ├── data_processing.py
-│ ├── evaluation.py
-│ ├── features_eng.py
-│ ├── visualizations.py # for all plots
-│ └── transformer_good_ass.py # BERT with tokenizer and model from scratch
+│   ├── data_processing.py      
+│   ├── evaluation.py           
+│   ├── features_eng.py         
+│   ├── visualizations.py       # for all plots
+│   └── transformer_good_ass.py # BERT with tokenizer and model from scratch
 ├── src/
-│ ├── cleaned_routes.csv # Raw data
-│ └── route_features.csv # Engineered features
-├── saved_models/ # Model checkpoints
-└── main.ipynb # execution of major class functions
+│   ├── cleaned_routes.csv      # Raw data
+│   └── route_features.csv      # Engineered features
+├── saved_models/               # Model checkpoints
+└── main.ipynb                  # execution of major class functions
+```
 
 ## Installation
 ```bash

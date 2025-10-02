@@ -1,0 +1,11 @@
+pandas
+matplotlib
+numpy
+seaborn
+scikit-learn
+plotly
+transformers
+torch
+accelerate>=0.26.0
+xgboost
+pytorch_lightning

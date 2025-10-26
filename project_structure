@@ -1,0 +1,33 @@
+src
+- data_processing
+- tokenizer
+- model # both architecture and trainer 
+- evaluation
+- generate
+
+- visualization
+- encoding_experiment
+
+- utils
+    - difficulty_to_vgrade
+    - difficulty_to_lettergrade
+    - vgrade_to_difficulty
+    - lettergrade_to_difficulty
+    - hold_id: func mapping and reverse
+
+
+csv_exports
+- climbs.csv
+- climb_stats.csv
+- difficulty_grades.csv
+and more...
+
+
+data
+- climbs.csv
+- climbs_cleaned.csv
+- climbs_feature.csv
+
+saved_models
+
+

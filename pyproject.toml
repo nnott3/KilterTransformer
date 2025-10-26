@@ -1,0 +1,20 @@
+[project]
+name = "kiltertransformer"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "accelerate>=0.26.0",
+    "datasets>=4.1.1",
+    "matplotlib>=3.10.6",
+    "numpy<2",
+    "pandas>=2.3.3",
+    "plotly>=6.3.1",
+    "pytorch-lightning>=2.5.5",
+    "scikit-learn>=1.7.2",
+    "seaborn>=0.13.2",
+    "torch<2.3.0",
+    "transformers>=4.57.0",
+    "xgboost>=3.0.5",
+]

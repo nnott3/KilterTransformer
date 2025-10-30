@@ -42,7 +42,7 @@ class Evaluation:
         print(f"  Within ±{within_grade} V-grade: {scores[f'within_±{within_grade}_grade']:.2f}%")
         return scores
     
-    def plot_predictions(self, y_true, y_pred):
+    def plot_predictions(self, y_true, y_pred, save=False):
         """Plot actual vs predicted with perfect prediction line."""
         y_true = np.array(y_true)
         y_pred = np.array(y_pred)
@@ -75,4 +75,10 @@ class Evaluation:
         plt.title("Actual vs Predicted Difficulty")
         plt.legend()
         plt.tight_layout()
+        
+        if save:
+            timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+            filename = f"figs/prediction_plot_{timestamp}.png"
+            plt.savefig(filename, dpi=300)
+            
         plt.show()

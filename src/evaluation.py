@@ -44,6 +44,9 @@ class Evaluation:
     
     def plot_predictions(self, y_true, y_pred):
         """Plot actual vs predicted with perfect prediction line."""
+        y_true = np.array(y_true)
+        y_pred = np.array(y_pred)
+    
         plt.figure(figsize=(8, 6))
         sns.histplot(x=y_true, y=y_pred, bins=30, pthresh=0.1, cmap="mako", cbar=True)
         plt.plot([y_true.min(), y_true.max()], [y_true.min(), y_true.max()],

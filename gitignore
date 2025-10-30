@@ -1,0 +1,30 @@
+# macOS system files
+.DS_Store
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environments
+.venv/
+venv/
+env/
+.env
+
+# UV / package manager artifacts
+.python-version
+uv.lock
+.uv_cache/
+.uv/
+.uv-build/
+.dist-info/
+
+# Jupyter / Colab
+.ipynb_checkpoints/
+
+# VSCode
+.vscode/
+.history/
+

@@ -147,8 +147,8 @@ def load_model(model_path: str, device: str = "cpu") -> KilterGPT:
 
 
 def train_model():
-    from .data_processing import DataPreprocessing
-    from .tokenizer import train_tokenizer
+    from src.data_processing import DataPreprocessing
+    from src.tokenizer import train_tokenizer
 
     run_name = f"run_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
     OUT_DIR = f"models/climb_gpt/{run_name}"

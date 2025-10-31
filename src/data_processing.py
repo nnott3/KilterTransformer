@@ -267,12 +267,11 @@ class DataPreprocessing:
 
     def preprocess_datasets(self, datasets, tokenizer):
         """Tokenize and remove original columns."""
-        for name in ("train", "test"):
+        for name in ("train", "val", "test"):
             col_names = datasets[name].column_names
             datasets[name] = self.tokenize_dataset(datasets[name], tokenizer).remove_columns(col_names)
         return datasets
     
-    # add more utils
     def holds_data_to_str(self, holds_data):
         """Convert holds_data to string.
         [{'1078': 15}, {'1153': 12}, {'1184': 13}] to 

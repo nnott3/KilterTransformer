@@ -21,18 +21,26 @@ import re
 class KilterGPT(nn.Module):
     """GPT-2 model for generating Kilter Board climbing routes."""
 
-    def __init__(self, vocab_size: int):
+    def __init__(
+        self, 
+        vocab_size: int,
+        n_embd: int = 192,
+        n_head: int = 3,
+        n_layer: int = 3,
+        n_positions: int = 128,
+        dropout: float = 0.1
+    ):
         super().__init__()
         config = GPT2Config(
             vocab_size=vocab_size,
-            n_embd=192,
-            n_head=3,
-            n_layer=3,
-            n_positions=128,
-            n_ctx=128,
-            resid_pdrop=0.1,
-            embd_pdrop=0.1,
-            attn_pdrop=0.1,
+            n_embd=n_embd,
+            n_head=n_head,
+            n_layer=n_layer,
+            n_positions=n_positions,
+            n_ctx=n_positions,
+            resid_pdrop=dropout,
+            embd_pdrop=dropout,
+            attn_pdrop=dropout,
         )
         self.model = GPT2LMHeadModel(config)
         self.config = config

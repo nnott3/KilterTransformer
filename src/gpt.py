@@ -29,7 +29,7 @@ class KilterGPT(nn.Module):
         n_layer: int = 3,
         n_positions: int = 128,
         dropout: float = 0.1
-    ):
+        ):
         super().__init__()
         config = GPT2Config(
             vocab_size=vocab_size,

@@ -153,6 +153,16 @@ def load_model(model_path: str, device: str = "cpu") -> KilterGPT:
     model.eval()
     return model
 
+def tokenize_dataset(dataset, tokenizer):
+    """Tokenize frames column."""
+    return dataset.map(lambda example: tokenizer(example["frames"]), batched=True)
+
+def preprocess_datasets(datasets, tokenizer):
+    """Tokenize and remove original columns."""
+    for name in ("train", "val", "test"):
+        col_names = datasets[name].column_names
+        datasets[name] = tokenize_dataset(datasets[name], tokenizer).remove_columns(col_names)
+    return datasets
 
 def train_model():
     from src.data_processing import DataPreprocessing
@@ -166,7 +176,8 @@ def train_model():
     datasets = dp.load_climbs()
 
     tokenizer = train_tokenizer(datasets, OUT_DIR)
-    datasets = dp.preprocess_datasets(datasets, tokenizer)
+    # move preprocess_datasets from dp to gpt
+    datasets = preprocess_datasets(datasets, tokenizer)
 
     model = KilterGPT(vocab_size=tokenizer.vocab_size)
 

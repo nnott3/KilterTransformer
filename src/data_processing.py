@@ -261,16 +261,16 @@ class DataPreprocessing:
         # return dataset.train_test_split(test_size=0.15, seed=42)
         return dataset
 
-    def tokenize_dataset(self, dataset, tokenizer):
-        """Tokenize frames column."""
-        return dataset.map(lambda example: tokenizer(example["frames"]), batched=True)
+    # def tokenize_dataset(self, dataset, tokenizer):
+    #     """Tokenize frames column."""
+    #     return dataset.map(lambda example: tokenizer(example["frames"]), batched=True)
 
-    def preprocess_datasets(self, datasets, tokenizer):
-        """Tokenize and remove original columns."""
-        for name in ("train", "val", "test"):
-            col_names = datasets[name].column_names
-            datasets[name] = self.tokenize_dataset(datasets[name], tokenizer).remove_columns(col_names)
-        return datasets
+    # def preprocess_datasets(self, datasets, tokenizer):
+    #     """Tokenize and remove original columns."""
+    #     for name in ("train", "val", "test"):
+    #         col_names = datasets[name].column_names
+    #         datasets[name] = self.tokenize_dataset(datasets[name], tokenizer).remove_columns(col_names)
+    #     return datasets
     
     def holds_data_to_str(self, holds_data):
         """Convert holds_data to string.

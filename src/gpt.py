@@ -164,62 +164,62 @@ def preprocess_datasets(datasets, tokenizer):
         datasets[name] = tokenize_dataset(datasets[name], tokenizer).remove_columns(col_names)
     return datasets
 
-def train_model():
-    from src.data_processing import DataPreprocessing
-    from src.tokenizer import train_tokenizer
+# def train_model():
+#     from src.data_processing import DataPreprocessing
+#     from src.tokenizer import train_tokenizer
 
-    run_name = f"run_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-    OUT_DIR = f"models/climb_gpt/{run_name}"
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+#     run_name = f"run_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+#     OUT_DIR = f"models/climb_gpt/{run_name}"
+#     device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    dp = DataPreprocessing()
-    datasets = dp.load_climbs()
+#     dp = DataPreprocessing()
+#     datasets = dp.load_climbs()
 
-    tokenizer = train_tokenizer(datasets, OUT_DIR)
-    # move preprocess_datasets from dp to gpt
-    datasets = preprocess_datasets(datasets, tokenizer)
+#     tokenizer = train_tokenizer(datasets, OUT_DIR)
+#     # move preprocess_datasets from dp to gpt
+#     datasets = preprocess_datasets(datasets, tokenizer)
 
-    model = KilterGPT(vocab_size=tokenizer.vocab_size)
+#     model = KilterGPT(vocab_size=tokenizer.vocab_size)
 
-    data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
+#     data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
 
-    training_args = TrainingArguments(
-        output_dir=OUT_DIR,
-        eval_strategy="steps",
-        save_strategy="best",
-        save_total_limit=3,
-        overwrite_output_dir=True,
-        logging_steps=1000,
-        num_train_epochs=1,
-        per_device_train_batch_size=16,
-        gradient_accumulation_steps=1,
-        learning_rate=1e-5,
-        weight_decay=0.01,
-        adam_beta1=0.9,
-        adam_beta2=0.999,
-        report_to="tensorboard",
-        remove_unused_columns=False,
-        greater_is_better=False,
-        logging_dir=f"{OUT_DIR}/logs",
-        load_best_model_at_end=True,
-        dataloader_pin_memory=False,
-    )
+#     training_args = TrainingArguments(
+#         output_dir=OUT_DIR,
+#         eval_strategy="steps",
+#         save_strategy="best",
+#         save_total_limit=3,
+#         overwrite_output_dir=True,
+#         logging_steps=1000,
+#         num_train_epochs=1,
+#         per_device_train_batch_size=16,
+#         gradient_accumulation_steps=1,
+#         learning_rate=1e-5,
+#         weight_decay=0.01,
+#         adam_beta1=0.9,
+#         adam_beta2=0.999,
+#         report_to="tensorboard",
+#         remove_unused_columns=False,
+#         greater_is_better=False,
+#         logging_dir=f"{OUT_DIR}/logs",
+#         load_best_model_at_end=True,
+#         dataloader_pin_memory=False,
+#     )
 
-    trainer = Trainer(
-        model=model.model,
-        args=training_args,
-        data_collator=data_collator,
-        train_dataset=datasets["train"],
-        eval_dataset=datasets["test"],
-        callbacks=[EarlyStoppingCallback(early_stopping_patience=3)],
-    )
+#     trainer = Trainer(
+#         model=model.model,
+#         args=training_args,
+#         data_collator=data_collator,
+#         train_dataset=datasets["train"],
+#         eval_dataset=datasets["test"],
+#         callbacks=[EarlyStoppingCallback(early_stopping_patience=3)],
+#     )
 
-    trainer.train()
+#     trainer.train()
 
-    model.model.save_pretrained(OUT_DIR)
-    tokenizer.save_pretrained(OUT_DIR)
-    print(f"\n✓ Model saved to {OUT_DIR}")
+#     model.model.save_pretrained(OUT_DIR)
+#     tokenizer.save_pretrained(OUT_DIR)
+#     print(f"\n✓ Model saved to {OUT_DIR}")
 
 
-if __name__ == "__main__":
-    train_model()
+# if __name__ == "__main__":
+#     train_model()

@@ -226,7 +226,7 @@ def generate_routes(
     use_constraints: bool = True,
     temperature: float = 0.9,
     max_new_tokens: int = 50,
-) -> Tuple[List[str], Dict]:
+    ) -> Tuple[List[str], Dict]:
     """Generate and evaluate climbing routes."""
     
     device = 'cuda' if torch.cuda.is_available() else 'cpu'

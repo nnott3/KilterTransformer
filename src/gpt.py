@@ -153,16 +153,33 @@ def load_model(model_path: str, device: str = "cpu") -> KilterGPT:
     model.eval()
     return model
 
-def tokenize_dataset(dataset, tokenizer):
-    """Tokenize frames column."""
-    return dataset.map(lambda example: tokenizer(example["frames"]), batched=True)
+# def tokenize_dataset(dataset, tokenizer):
+#     """Tokenize frames column."""
+#     return dataset.map(lambda example: tokenizer(example["frames"]), batched=True)
+
+# def preprocess_datasets(datasets, tokenizer):
+#     """Tokenize and remove original columns."""
+#     for name in ("train", "val", "test"):
+#         col_names = datasets[name].column_names
+#         datasets[name] = tokenize_dataset(datasets[name], tokenizer).remove_columns(col_names)
+#     return datasets
 
 def preprocess_datasets(datasets, tokenizer):
-    """Tokenize and remove original columns."""
+    def tokenize_function(examples):
+        tok = tokenizer(examples["frames"], truncation=True, padding=False)
+        tok["labels"] = [
+            [-100] + ids[1:] if ids and ids[0] == tokenizer.bos_token_id else ids
+            for ids in tok["input_ids"]
+        ]
+        return tok
+
     for name in ("train", "val", "test"):
-        col_names = datasets[name].column_names
-        datasets[name] = tokenize_dataset(datasets[name], tokenizer).remove_columns(col_names)
+        if name in datasets:
+            datasets[name] = datasets[name].map(
+                tokenize_function, batched=True, remove_columns=datasets[name].column_names
+            )
     return datasets
+
 
 # def train_model():
 #     from src.data_processing import DataPreprocessing

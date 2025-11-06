@@ -286,6 +286,6 @@ def train_and_evaluate():
     evaluator.plot_predictions(y_test, y_pred)
 
 
-if name == '__main__':
+if __name__ == '__main__':
     train_and_evaluate()
     

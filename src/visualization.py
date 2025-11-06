@@ -17,7 +17,7 @@ class Visualization:
     def __init__(self, board_img_path="figs/full_board_commercial.png"):
         try:
             self.board_img = Image.open(board_img_path).convert("RGBA")
-        except:  # noqa: E722
+        except:  
             print(f"Warning: Could not load board image from {board_img_path}")
             self.board_img = None
     
@@ -71,6 +71,7 @@ class Visualization:
         fig, ax = plt.subplots(figsize=(10, 12))
         ax.imshow(self.board_img)
         if all_holds:
+            title = "All holds"
             for hold_id in HOLD_ID:
                 idx = HOLD_ID.index(hold_id)
                 x, y = HOLDCOORDINATES[idx]
@@ -80,6 +81,7 @@ class Visualization:
                 else:
                     ax.plot(x, y, 'ro', markersize=3)
         elif not all_holds and len(hold_ids) > 0:
+            title = f"{len(hold_ids)} holds : {" ".join([str(h) for h in hold_ids][:5])}..."
             for hold_id in hold_ids:
                 idx = HOLD_ID.index(hold_id)
                 x, y = HOLDCOORDINATES[idx]
@@ -91,6 +93,7 @@ class Visualization:
             
         
         ax.axis("off")
+        ax.set_title(title)
         plt.tight_layout()
         if save:
             plt.savefig('figs/hold_ids.png', dpi=150)
@@ -142,7 +145,6 @@ class Visualization:
         Holds_data list of dict
         - [{'1078': 15}, {'1153': 12}, {'1184': 13}]
         """
-    
         if self.board_img is None:
             return
         if isinstance(data, list):
@@ -150,14 +152,17 @@ class Visualization:
             holds_data = data
         elif isinstance(data, str):
             angle = int(re.search(r"angle(\d+)", data).group(1)) if re.search(r"angle(\d+)", data) else None
-            v_grade = int(re.search(r"grade(\d+)", data).group(1)) if re.search(r"grade(\d+)", data) else None
+            grade = int(re.search(r"grade(\d+)", data).group(1)) if re.search(r"grade(\d+)", data) else None
+            
             dp = DataPreprocessing()
-            holds_data = dp.str_to_holds_data(data) #holds_data            
+            v_grade = dp.difficulty_to_v_grade(grade) if grade else None
+            letter_grade = dp.difficulty_to_letter_grade(grade) if grade else None
+            holds_data = dp.str_to_holds_data(data) #holds_data        
         
-        fig, ax = plt.subplots(figsize=(5, 6))
+        fig, ax = plt.subplots(figsize=(10, 6))
         ax.imshow(self.board_img)
         
-    
+
         for hold in holds_data:
             for hold_id_str, role in hold.items():
                 hold_id = int(hold_id_str)
@@ -170,12 +175,14 @@ class Visualization:
                     ax.add_patch(circle)
         
         ax.axis("off")
-        
-        # Set title
+
         if predicted_v_grade:
-            title = f"{name} | Actual: V{v_grade} | Predicted: V{predicted_v_grade}"
+            title = f"{name} | Angle: {angle} | Actual: V{v_grade} | Predicted: V{predicted_v_grade}"
+        elif name:
+            title = f"{name} | Angle: {angle} V{v_grade} "
         else:
-            title = f"{name} (V{v_grade})" if v_grade else name
+            title = f"Angle:{angle} | V{v_grade} | {letter_grade}"
+        
         ax.set_title(title)
         
         plt.tight_layout()

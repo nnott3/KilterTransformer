@@ -188,7 +188,6 @@ class DataPreprocessing:
 
     def load_climbs(self, cache_path="data/climbs_cleaned.csv"):
         """Load climbs as HuggingFace Dataset."""
-        
         if os.path.exists(cache_path):
             df = pd.read_csv(cache_path)
             print(f"Loaded {len(df)} routes from cache {cache_path}")

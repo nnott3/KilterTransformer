@@ -7,7 +7,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from transformers import (
     GPT2LMHeadModel,
-    GPT2Config,
+    GPT2Config
     PreTrainedTokenizerFast,
     DataCollatorForLanguageModeling,
     Trainer,

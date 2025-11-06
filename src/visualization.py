@@ -22,7 +22,7 @@ class Visualization:
             self.board_img = None
     
     
-    def plot_difficulty_quality_analysis(self, routes_df, dp, save=False):
+    def plot_difficulty_quality_analysis(self, routes_df, dp, save_fig=False):
         """Plot difficulty distribution and quality vs difficulty."""
         
         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
@@ -59,11 +59,11 @@ class Visualization:
         apply_v_labels(ax2, quality_data)
 
         plt.tight_layout()
-        if save:
+        if save_fig:
             plt.savefig('figs/difficulty_quality_analysis.png', dpi=150)
         plt.show()
     
-    def plot_hold_ids(self, hold_ids: List[int]=[], all_holds=True, show_ids=True, save=False):
+    def plot_hold_ids(self, hold_ids: List[int]=[], all_holds=True, show_ids=True, save_fig=False):
         """Display hold IDs on board."""
         if self.board_img is None:
             return
@@ -95,11 +95,11 @@ class Visualization:
         ax.axis("off")
         ax.set_title(title)
         plt.tight_layout()
-        if save:
+        if save_fig:
             plt.savefig('figs/hold_ids.png', dpi=150)
         plt.show()
     
-    def plot_heatmap(self, hold_values, title="", cmap='Reds', hold_type='all', alpha=0.4, save=False):
+    def plot_heatmap(self, hold_values, title="", cmap='Reds', hold_type='all', alpha=0.4, save_fig=False):
         """Overlay heatmap values on board."""
         if self.board_img is None:
             return
@@ -134,11 +134,11 @@ class Visualization:
         ax.axis("off")
         ax.set_title(title)
         plt.tight_layout()
-        if save:
+        if save_fig:
             plt.savefig(f'figs/{title}_{hold_type}_heatmap.png', dpi=150)
         plt.show()
     
-    def plot_boulder(self, data, name="", angle="", v_grade="", predicted_v_grade="", save=False):
+    def plot_boulder(self, data, name="", angle="", v_grade="", predicted_v_grade="", save_fig=False):
         """
         Visualize route from string
         - angle40_grade18_start1111_hand2222_feet3333_finish4444
@@ -179,7 +179,7 @@ class Visualization:
         if predicted_v_grade:
             title = f"{name} | Angle: {angle} | Actual: V{v_grade} | Predicted: V{predicted_v_grade}"
         elif name:
-            title = f"{name} | Angle: {angle} V{v_grade} "
+            title = f"{name} | Angle: {angle} | V{v_grade} | {letter_grade}"
         else:
             title = f"Angle:{angle} | V{v_grade} | {letter_grade}"
         
@@ -187,12 +187,12 @@ class Visualization:
         
         plt.tight_layout()
         
-        if save:
+        if save_fig:
             plt.savefig(f'figs/{name}_V{v_grade}.png', dpi=150)
         
         plt.show()
     
-    def plot_correlation(self, df, save_dir='figs', save=False):
+    def plot_correlation(self, df, save_dir='figs', save_fig=False):
         """Full correlation heatmap between all features."""
         key_features = [
             'display_difficulty', 'angle_y', 'num_holds', 'num_hand', 
@@ -212,13 +212,13 @@ class Visualization:
                     cbar_kws={"label": "Correlation"}, vmin=-1, vmax=1)
         plt.title('Feature Correlation Matrix', fontsize=14, fontweight='bold', pad=20)
         plt.tight_layout()
-        if save:
+        if save_fig:
             plt.savefig(f'{save_dir}/correlation_matrix.png', dpi=150, bbox_inches='tight')
         plt.show()
         
         return corr_matrix
     
-    def plot_corr_with_difficulty(self, df, save_dir='figs', save=False):
+    def plot_corr_with_difficulty(self, df, save_dir='figs', save_fig=False):
         """Feature correlations with difficulty target variable."""
         key_features = [
             'angle_y', 'num_holds', 'num_hand', 'num_foot',
@@ -245,11 +245,11 @@ class Visualization:
                     va='center', ha='left' if val > 0 else 'right', fontsize=9)
         
         plt.tight_layout()
-        if save:
+        if save_fig:
             plt.savefig(f'{save_dir}/difficulty_correlation.png', dpi=150, bbox_inches='tight')
         plt.show()
     
-    def plot_distribution(self, df, save_dir='figs', save=False):
+    def plot_distribution(self, df, save_dir='figs', save_fig=False):
         """Feature distributions by grade and quality-popularity relationship."""
         fig, axes = plt.subplots(2, 3, figsize=(16, 9))
         axes = axes.flatten()
@@ -286,7 +286,7 @@ class Visualization:
             ax.grid(alpha=0.3, which='both')
         
         plt.tight_layout()
-        if save:
+        if save_fig:
             plt.savefig(f'{save_dir}/distributions.png', dpi=150, bbox_inches='tight')
         plt.show()
 
@@ -361,10 +361,10 @@ if __name__ == "__main__":
     
     print("Generating visualizations...")
     viz.plot_hold_ids()
-    viz.plot_difficulty_quality_analysis(df, dp, save=True)
-    viz.plot_correlation(df, save=True)
-    viz.plot_corr_with_difficulty(df, save=True)
-    viz.plot_distribution(df, save=True)
+    viz.plot_difficulty_quality_analysis(df, dp, save_fig=True)
+    viz.plot_correlation(df, save_fig=True)
+    viz.plot_corr_with_difficulty(df, save_fig=True)
+    viz.plot_distribution(df, save_fig=True)
     
     # Sample climbs
     for i in range(min(3, len(dataset))):
@@ -373,6 +373,6 @@ if __name__ == "__main__":
             sample['holds_data'],
             name=sample['name'][:20],
             v_grade=sample['v_grade'],
-            save=True
+            save_fig=True
         )
     

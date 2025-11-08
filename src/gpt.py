@@ -7,7 +7,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from transformers import (
     GPT2LMHeadModel,
-    GPT2Config
+    GPT2Config,
     PreTrainedTokenizerFast,
     DataCollatorForLanguageModeling,
     Trainer,
@@ -40,6 +40,8 @@ class KilterGPT(nn.Module):
         ):
         
         super().__init__()
+
+        self.tokenizer = tokenizer
         config = GPT2Config(
             n_embd=n_embd,
             n_head=n_head,
@@ -49,10 +51,11 @@ class KilterGPT(nn.Module):
             resid_pdrop=dropout,
             embd_pdrop=dropout,
             attn_pdrop=dropout,
+            vocab_size=tokenizer.vocab_size,
             )
         self.config = config
         self.model = GPT2LMHeadModel(config)
-        self.tokenizer = tokenizer
+        
     
     def forward(self, input_ids, attention_mask=None, token_type_ids=None, labels=None):
         """
@@ -240,47 +243,52 @@ class KilterGPT(nn.Module):
 
 
         return loss
-    
-    @classmethod    
-    def load_last_checkpoint(cls, output_dir: str) -> Tuple["KilterGPT", PreTrainedTokenizerFast, Trainer]:
+
+    @classmethod
+    def load_from_checkpoint(cls, OUT_DIR, datasets):
         """
-        Load the latest checkpoint from a training output directory.
-        Also loads the tokenizer and Trainer from the same directory.
+        Recreate KilterGPT, tokenizer, and Trainer from a saved OUT_DIR.
+        Returns: (gpt, trainer, tokenizer)
         """
-        device = "cuda" if torch.cuda.is_available() else "cpu"
 
-        checkpoints = sorted([
-            d for d in os.listdir(output_dir)
-            if d.startswith("checkpoint-") and os.path.isdir(os.path.join(output_dir, d))
-        ], key=lambda x: int(x.split("-")[1]))
+        # === Paths ===
+        CHECKPOINTS = sorted(
+            [d for d in os.listdir(OUT_DIR) if d.startswith("checkpoint-")],
+            key=lambda x: int(x.split("-")[1])
+        )
+        CHECKPOINT_DIR = os.path.join(OUT_DIR, CHECKPOINTS[-1]) if CHECKPOINTS else OUT_DIR
+        MODEL_BIN = f"{OUT_DIR}/pytorch_model.bin"
+        ARGS_BIN = f"{CHECKPOINT_DIR}/training_args.bin"
 
-        if not checkpoints:
-            raise FileNotFoundError(f"No checkpoint directories found in {output_dir}")
+        # === 1. Load tokenizer ===
+        tokenizer = PreTrainedTokenizerFast.from_pretrained(OUT_DIR)
+        print(f"Tokenizer vocab size: {tokenizer.vocab_size}")
 
-        latest = checkpoints[-1]
-        checkpoint_dir = os.path.join(output_dir, latest)
-        checkpoint_path = os.path.join(checkpoint_dir, "pytorch_model.bin")
+        # === 2. Load config (must use same vocab_size) ===
+        config = GPT2Config.from_pretrained(OUT_DIR)
+        config.vocab_size = tokenizer.vocab_size  # force match (avoid resizing warning)
 
-        print(f"Loading checkpoint: {latest}")
+        # === 3. Create model and load weights ===
+        gpt = cls(tokenizer=tokenizer)
+        gpt.model = GPT2LMHeadModel(config)
+        gpt.model.from_pretrained(OUT_DIR)
 
-        tokenizer_path = checkpoint_dir if os.path.exists(os.path.join(checkpoint_dir, "tokenizer.json")) else output_dir
-        tokenizer = PreTrainedTokenizerFast.from_pretrained(tokenizer_path)
+        # === 4. Load TrainingArguments ===
+        training_args = torch.load(ARGS_BIN, weights_only=False)
 
-        # instantiate model (cls, not self.model)
-        model = cls(tokenizer=tokenizer) 
-        model.config.vocab_size = tokenizer.vocab_size
-        model.model.resize_token_embeddings(tokenizer.vocab_size)
-        model.tokenizer = tokenizer
+        # === 5. Create Trainer ===
+        data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
+        trainer = Trainer(
+            model=gpt,
+            args=training_args,
+            data_collator=data_collator,
+            train_dataset=datasets["train"],
+            eval_dataset=datasets["val"],
+        )
 
-        trainer = Trainer(model=model)
-        trainer.model.load_state_dict(torch.load(checkpoint_path, map_location=device))
+        return gpt, trainer, tokenizer
 
-        model.to(device)
-        model.eval()
-        # print(model)
-        
-        return model, tokenizer,  trainer
-             
+
     def generate_route(
         self,
         prompt: str = "angle50 grade20",

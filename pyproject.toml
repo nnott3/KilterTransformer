@@ -7,6 +7,7 @@ requires-python = ">=3.12"
 dependencies = [
     "accelerate>=0.26.0",
     "datasets>=4.1.1",
+    "gradio>=5.49.1",
     "matplotlib>=3.10.6",
     "numpy<2",
     "pandas>=2.3.3",
@@ -14,7 +15,7 @@ dependencies = [
     "pytorch-lightning>=2.5.5",
     "scikit-learn>=1.7.2",
     "seaborn>=0.13.2",
-    "torch<2.3.0",
+    "torch @ file:///Users/nottreepat/pytorch/dist/torch-2.6.0-cp312-cp312-macosx_10_15_x86_64.whl",
     "transformers>=4.57.0",
     "wandb>=0.22.3",
     "xgboost>=3.0.5",

@@ -81,7 +81,7 @@ class Visualization:
                 else:
                     ax.plot(x, y, 'ro', markersize=3)
         elif not all_holds and len(hold_ids) > 0:
-            title = f"{len(hold_ids)} holds : {" ".join([str(h) for h in hold_ids][:5])}..."
+            title = f"{len(hold_ids)} holds : {' '.join([str(h) for h in hold_ids][:5])}..."
             for hold_id in hold_ids:
                 idx = HOLD_ID.index(hold_id)
                 x, y = HOLDCOORDINATES[idx]

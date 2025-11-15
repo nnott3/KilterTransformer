@@ -320,9 +320,11 @@ class KilterGPT(nn.Module):
         max_length: int = 50,
         temperature: float = 0.2,
         top_k: Optional[int] = None,
-        repetition_penalty: float = 1.2,   # <-- new arg
+        repetition_penalty: float = 1.2,
         do_sample: bool = True,
         constraint: bool = False,
+        animate: bool = False,
+        animation_callback = None,
         ) -> str:
         
         """Autoregressively generate climbing route."""
@@ -337,7 +339,7 @@ class KilterGPT(nn.Module):
             input_ids = torch.tensor([[self.tokenizer.bos_token_id]], device=self.device)
 
         for _ in range(max_length - input_ids.shape[1]):
-            outputs = self.model(input_ids) ###############
+            outputs = self.model(input_ids)
             logits = outputs.logits[:, -1, :]  # (1, vocab_size)
 
             # Apply repetition penalty
@@ -357,7 +359,14 @@ class KilterGPT(nn.Module):
 
             # Sample or greedy
             probs = F.softmax(logits, dim=-1)
-            top_tokens = torch.topk(probs, 5)
+            
+            # Animation callback with top-k tokens
+            if animate and animation_callback is not None:
+                top_tokens_probs, top_tokens_ids = torch.topk(probs, min(top_k, probs.size(-1)))
+                top_tokens = [(self.tokenizer.decode([tid.item()]), prob.item()) 
+                            for tid, prob in zip(top_tokens_ids[0], top_tokens_probs[0])]
+                
+                animation_callback(top_tokens, top_tokens_ids)
 
             if do_sample:
                 next_token = torch.multinomial(probs, num_samples=1)
@@ -374,6 +383,93 @@ class KilterGPT(nn.Module):
         return generated_text
 
 
+    # new claude's
+    @torch.no_grad()
+    def generate_with_constraint(
+        self,
+        prompt: str = "",
+        max_length: int = 50,
+        temperature: float = 1,
+        top_k: Optional[int] = 8,
+        repetition_penalty: float = 1.2,
+        do_sample: bool = True,
+        min_holds: int = 5,
+        max_holds: int = 15,
+        animate: bool = False,
+        animation_callback = None,
+        ) -> str:
+        """Autoregressively generate climbing route with structural constraints."""
+
+        self.model.eval()
+        self.model.to(self.device)
+
+        # Initialize constraint processor
+        processors = LogitsProcessorList([
+            RouteConstraintProcessor(
+                tokenizer=self.tokenizer,
+                min_holds=min_holds,
+                max_holds=max_holds
+            )
+        ])
+
+        # Tokenize prompt
+        if prompt:
+            input_ids = self.tokenizer.encode(prompt, return_tensors="pt").to(self.device)
+            input_ids = input_ids[:, :-1]  # remove auto-added EOS, maybe encode(skip_special_tokens=True might work but later)
+        else:
+            input_ids = torch.tensor([[self.tokenizer.bos_token_id]], device=self.device)
+
+        for _ in range(max_length - input_ids.shape[1]):
+            outputs = self.model(input_ids)
+            logits = outputs.logits[:, -1, :]  # (1, vocab_size)
+
+            # Apply repetition penalty
+            for token_id in set(input_ids[0].tolist()):
+                if logits[0, token_id] < 0:
+                    logits[0, token_id] *= repetition_penalty
+                else:
+                    logits[0, token_id] /= repetition_penalty
+
+            # Apply temperature
+            logits = logits / temperature
+
+            # Apply top-k filtering
+            if top_k is not None:
+                indices_to_remove = logits < torch.topk(logits, top_k)[0][..., -1, None]
+                logits[indices_to_remove] = -float("Inf")
+
+            # THE constraint processor (only difference lol)
+            logits = processors(input_ids, logits)
+
+            # Convert to probabilities
+            probs = F.softmax(logits, dim=-1)
+            
+            # Animation callback with top-k tokens
+            if animate and animation_callback is not None:
+                top_tokens_probs, top_tokens_ids = torch.topk(probs, min(top_k, probs.size(-1)))
+                top_tokens = [(self.tokenizer.decode([tid.item()]), prob.item()) 
+                            for tid, prob in zip(top_tokens_ids[0], top_tokens_probs[0])]
+                
+                animation_callback(top_tokens, top_tokens_ids)
+
+            # Sample or greedy
+            if do_sample:
+                next_token = torch.multinomial(probs, num_samples=1)
+            else:
+                next_token = torch.argmax(probs, dim=-1, keepdim=True)
+
+            # Append token
+            input_ids = torch.cat([input_ids, next_token], dim=-1)
+
+            # Stop at EOS
+            if next_token.item() == self.tokenizer.eos_token_id:
+                break
+
+        generated_text = self.tokenizer.decode(input_ids[0], skip_special_tokens=True)
+        return generated_text
+    
+    
+    
     @torch.no_grad()
     def generate_from_templates(
         self,
@@ -620,80 +716,6 @@ class KilterGPT(nn.Module):
         print("="*70)
 
 
-    @torch.no_grad()
-    def generate_with_constraint(
-        self,
-        prompt: str = "",
-        max_length: int = 50,
-        temperature: float = 1,
-        top_k: Optional[int] = None,
-        repetition_penalty: float = 1.2,
-        do_sample: bool = True,
-        min_holds: int = 5,
-        max_holds: int = 15,
-        ) -> str:
-        """Autoregressively generate climbing route with structural constraints."""
-
-        self.model.eval()
-        self.model.to(self.device)
-
-        # Initialize constraint processor
-        processors = LogitsProcessorList([
-            RouteConstraintProcessor(
-                tokenizer=self.tokenizer,
-                min_holds=min_holds,
-                max_holds=max_holds
-            )
-        ])
-
-        # Tokenize prompt
-        if prompt:
-            input_ids = self.tokenizer.encode(prompt, return_tensors="pt").to(self.device)
-            input_ids = input_ids[:, :-1]  # remove auto-added EOS
-        else:
-            input_ids = torch.tensor([[self.tokenizer.bos_token_id]], device=self.device)
-
-        for _ in range(max_length - input_ids.shape[1]):
-            outputs = self.model(input_ids)
-            logits = outputs.logits[:, -1, :]  # (1, vocab_size)
-
-            # Apply repetition penalty
-            for token_id in set(input_ids[0].tolist()):
-                if logits[0, token_id] < 0:
-                    logits[0, token_id] *= repetition_penalty
-                else:
-                    logits[0, token_id] /= repetition_penalty
-
-            # Apply temperature
-            logits = logits / temperature
-
-            # Apply top-k filtering
-            if top_k is not None:
-                indices_to_remove = logits < torch.topk(logits, top_k)[0][..., -1, None]
-                logits[indices_to_remove] = -float("Inf")
-
-            # Apply constraint processor
-            logits = processors(input_ids, logits)
-
-            # Convert to probabilities
-            probs = F.softmax(logits, dim=-1)
-
-            # Sample or greedy
-            if do_sample:
-                next_token = torch.multinomial(probs, num_samples=1)
-            else:
-                next_token = torch.argmax(probs, dim=-1, keepdim=True)
-
-            # Append token
-            input_ids = torch.cat([input_ids, next_token], dim=-1)
-
-            # Stop at EOS
-            if next_token.item() == self.tokenizer.eos_token_id:
-                break
-
-        generated_text = self.tokenizer.decode(input_ids[0], skip_special_tokens=True)
-        return generated_text
-
 class RouteConstraintProcessor(LogitsProcessor):
     """Enforce logical and structural constraints on climbing route generation."""
 
@@ -720,7 +742,7 @@ class RouteConstraintProcessor(LogitsProcessor):
             decoded = self.tokenizer.decode(input_ids[batch_idx], skip_special_tokens=True)
             parts = decoded.split()
 
-            print(parts)
+            # print(parts)
 
             # --- Encourage correct order (angle first, grade second) ---
             has_angle = any(p.startswith("angle") for p in parts)
@@ -920,4 +942,3 @@ def train_gpt():
     
 
 
-    

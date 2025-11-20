@@ -62,34 +62,6 @@ cp ../src/tokenizer.py src/ 2>/dev/null || echo "⚠️  tokenizer.py not found 
 echo "   Creating src/__init__.py..."
 touch src/__init__.py
 
-# Step 5: requirements.txt
-echo ""
-echo "📝 Step 5: Creating requirements.txt..."
-cat > requirements.txt << EOF
-# Core ML / Deep Learning
-torch==2.6.0
-transformers>=4.45.0
-datasets>=2.14.0
-pytorch-lightning>=2.5.5
-wandb>=0.13.12
-
-# Data processing
-numpy==1.24.3
-pandas>=2.3.3
-
-# Visualization
-matplotlib>=3.10.6
-seaborn>=0.13.2
-plotly>=6.3.1
-pillow>=10.1.0
-
-# ML utilities
-scikit-learn>=1.7.2
-xgboost>=3.0.5
-
-# Tokenizers
-tokenizers>=0.13.3
-EOF
 
 # Step 6: README.md
 echo ""
@@ -120,7 +92,7 @@ Generate custom climbing routes for the Kilter Board using AI!
 
 ## Model
 - Architecture: Custom GPT-2 (6 layers, 4 heads, 256 dim)
-- Training: 50,000+ real Kilter Board routes
+- Training: 70,000+ real Kilter Board routes
 - Custom order-invariant loss function
 
 ---

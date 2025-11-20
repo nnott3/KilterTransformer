@@ -63,7 +63,7 @@ class Visualization:
             plt.savefig('figs/difficulty_quality_analysis.png', dpi=150)
         plt.show()
     
-    def plot_hold_ids(self, hold_ids: List[int]=[], all_holds=True, show_ids=True, save_fig=False):
+    def plot_hold_ids(self, hold_ids: List[int]=[], all_holds=True, save_fig=False):
         """Display hold IDs on board."""
         if self.board_img is None:
             return
@@ -75,23 +75,17 @@ class Visualization:
             for hold_id in HOLD_ID:
                 idx = HOLD_ID.index(hold_id)
                 x, y = HOLDCOORDINATES[idx]
-                if show_ids:
-                    ax.text(x, y, f"{hold_id}", color="#000", fontsize=6, ha="center", va="center",
-                        bbox=dict(facecolor="white", alpha=0.6, edgecolor="none", pad=1))
-                else:
-                    ax.plot(x, y, 'ro', markersize=3)
+                ax.text(x, y, f"{hold_id}", color="#000", fontsize=7, ha="center", va="center",
+                    bbox=dict(facecolor="white", alpha=0.6, edgecolor="none", pad=1))
+                
         elif not all_holds and len(hold_ids) > 0:
             title = f"{len(hold_ids)} holds : {' '.join([str(h) for h in hold_ids][:5])}..."
             for hold_id in hold_ids:
                 idx = HOLD_ID.index(hold_id)
                 x, y = HOLDCOORDINATES[idx]
-                if show_ids:
-                    ax.text(x, y, f"{hold_id}", color="#000", fontsize=6, ha="center", va="center",
-                        bbox=dict(facecolor="white", alpha=0.6, edgecolor="none", pad=1))
-                else:
-                    ax.plot(x, y, 'ro', markersize=3)
-            
-        
+                ax.text(x, y, f"{hold_id}", color="#000", fontsize=9, ha="center", va="center",
+                    bbox=dict(facecolor="white", alpha=0.6, edgecolor="none", pad=1))
+                        
         ax.axis("off")
         ax.set_title(title)
         plt.tight_layout()
@@ -138,7 +132,7 @@ class Visualization:
             plt.savefig(f'figs/{title}_{hold_type}_heatmap.png', dpi=150)
         plt.show()
     
-    def plot_boulder(self, data, name="", angle="", v_grade="", predicted_v_grade="", save_fig=False):
+    def plot_boulder(self, data, name="", angle="", v_grade="", predicted_v_grade="", save_fig=False, show_ids=False):
         """
         Visualize route from string
         - angle40_grade18_start1111_hand2222_feet3333_finish4444
@@ -172,6 +166,9 @@ class Visualization:
                     color = HOLD_COLORS.get(role, "#000000")
                     circle = plt.Circle((x, y), radius=30, facecolor='none',
                                     linestyle='-', edgecolor=color, linewidth=2)
+                    if show_ids:
+                        ax.text(x, y, f"{hold_id}", color="#000", fontsize=8, ha="center", va="center",
+                            bbox=dict(facecolor="white", alpha=0.6, edgecolor="none", pad=1))
                     ax.add_patch(circle)
         
         ax.axis("off")

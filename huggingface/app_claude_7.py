@@ -515,7 +515,7 @@ with gr.Blocks(
             
             search_btn = gr.Button("🔍 Similar boulders", size="lg")
     
-    with gr.Accordion("## 🔍 Similar Boulders", open=False) as search_accordion:
+    with gr.Accordion("## 🔍 Similar Boulders", open=True) as search_accordion:
         with gr.Row():
             with gr.Column(scale=2):
                 sort_dropdown = gr.Dropdown(choices=["similarity", "grade", "angle"], value="similarity", label="Sort by")
@@ -578,7 +578,7 @@ with gr.Blocks(
     
 
     
-    gr.Markdown("## 🧗 KilterGPT Technical Deep Dive")
+    gr.Markdown("# 🧗 Technical Deep Dive")
 
     # ====================================================================
     # Section 0: Holds Encoding
@@ -648,7 +648,7 @@ with gr.Blocks(
     # ====================================================================
     # Section 2: Model Architecture
     # ====================================================================
-    with gr.Accordion("2 GPT Model Architecture", open=True):
+    with gr.Accordion("2 Model Architecture", open=True):
         model_arch_file = Path(__file__).parent / "blog_texts" / "model_arch.md"
         gr.Markdown(model_arch_file.read_text())
     
@@ -660,7 +660,7 @@ with gr.Blocks(
     # Section 3: Order-Invariant Loss
     # ====================================================================
     
-    with gr.Accordion("3 Order-Invariant Loss Function", open=True):
+    with gr.Accordion("3 Loss Function", open=True):
         order_loss_file = Path(__file__).parent / "blog_texts" / "order_loss.md"
         gr.Markdown(order_loss_file.read_text())
         
@@ -670,9 +670,9 @@ with gr.Blocks(
     # ====================================================================
     # Section 4: Data Augmentation
     # ====================================================================
-    with gr.Accordion("4 Data Augmentation: Shuffling Hold Sequences", open=True):
+    with gr.Accordion("4 Data Augmentation", open=True):
         gr.Markdown("""
-        ### Why Shuffle Holds?
+        ## Why Shuffle Holds?
         
         This method in training further amplifies the goal that we want the model to perform:
         
